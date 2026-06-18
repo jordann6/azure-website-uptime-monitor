@@ -5,6 +5,7 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 permissions:
   id-token: write
@@ -70,7 +71,7 @@ jobs:
     name: Apply & Deploy Function
     runs-on: ubuntu-latest
     needs: validate
-    if: github.ref == 'refs/heads/main'
+    if: github.event_name == 'workflow_dispatch'
     environment: production
     steps:
       - uses: actions/checkout@v4

@@ -66,7 +66,7 @@ func azure functionapp publish "$(terraform output -raw function_app_name)" --py
 
 ## CI/CD
 
-GitHub Actions (`.github/workflows/deploy.yml`) lints the function with Ruff, scans dependencies with pip-audit, runs `terraform fmt/validate/plan`, then on `main` applies and deploys the function code, all via OIDC. Required secrets: `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`.
+GitHub Actions (`.github/workflows/deploy.yml`) lints the function with Ruff, scans dependencies with pip-audit, and runs `terraform fmt/validate/plan` on every push, all via OIDC. The apply-and-deploy job is gated behind a manual `workflow_dispatch` trigger so the deploy/demo/destroy lifecycle stays under your control. Required secrets: `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`.
 
 ## Tech Stack
 
