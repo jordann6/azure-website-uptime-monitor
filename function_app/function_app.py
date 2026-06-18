@@ -10,7 +10,7 @@ import uuid
 from datetime import datetime, timezone
 
 import azure.functions as func
-from azure.cosmos import CosmosClient, PartitionKey
+from azure.cosmos import CosmosClient
 from azure.identity import DefaultAzureCredential
 
 app = func.FunctionApp()
