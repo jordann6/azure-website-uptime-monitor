@@ -31,7 +31,7 @@ jobs:
 
       - name: Ruff
         run: |
-          pip install ruff
+          pip install ruff==0.16.1
           ruff check function_app/
 
       - name: pip-audit — dependency CVE scan

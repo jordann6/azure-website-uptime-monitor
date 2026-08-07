@@ -15,6 +15,8 @@ from azure.identity import DefaultAzureCredential
 
 app = func.FunctionApp()
 
+logger = logging.getLogger(__name__)
+
 COSMOS_ENDPOINT = os.environ["COSMOS_ENDPOINT"]
 COSMOS_DATABASE = os.environ["COSMOS_DATABASE"]
 COSMOS_CONTAINER = os.environ["COSMOS_CONTAINER"]
@@ -37,7 +39,8 @@ def _http_check(url):
     try:
         req = urllib.request.Request(url, method="GET")
         req.add_header("User-Agent", "UptimeMonitor/1.0")
-        with urllib.request.urlopen(req, timeout=10) as response:  # noqa: S310 (https only)
+        # CHECK_URL is operator-supplied config and always http(s).
+        with urllib.request.urlopen(req, timeout=10) as response:
             status_code = response.getcode()
             body = response.read(8192).decode("utf-8", errors="ignore")
             latency_ms = round((time.monotonic() - start) * 1000)
@@ -50,7 +53,7 @@ def _http_check(url):
     except urllib.error.URLError as e:
         latency_ms = round((time.monotonic() - start) * 1000)
         return None, latency_ms, False, False, str(e.reason)
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 — a probe failure is data, not a crash
         latency_ms = round((time.monotonic() - start) * 1000)
         return None, latency_ms, False, False, str(e)
 
@@ -66,7 +69,7 @@ def _ssl_days_remaining(hostname):
             cert = sock.getpeercert()
             expiry = datetime.strptime(cert["notAfter"], "%b %d %H:%M:%S %Y %Z").replace(tzinfo=timezone.utc)
             return (expiry - datetime.now(timezone.utc)).days
-    except Exception:
+    except Exception:  # noqa: BLE001 — cert introspection is best-effort
         return None
 
 
@@ -103,7 +106,7 @@ def uptime_check(timer: func.TimerRequest) -> None:
     # Structured log -> Application Insights customDimensions. KQL scheduled-query
     # alerts (site-down, high-latency) run over these records; this is the Azure
     # analog to emitting custom CloudWatch metrics and alarming on them.
-    logging.info(
+    logger.info(
         "uptime_result %s",
         json.dumps({
             "check_id": check_id,
